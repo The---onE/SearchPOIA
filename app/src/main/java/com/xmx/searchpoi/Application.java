@@ -6,7 +6,6 @@ import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.AVOSCloud;
 import com.xmx.searchpoi.Tools.CrashHandler;
 import com.xmx.searchpoi.Tools.Data.DataManager;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POIManager;
 import com.xmx.searchpoi.User.UserManager;
 
 import org.xutils.x;
@@ -58,7 +57,7 @@ public class Application extends android.app.Application {
 
         UserManager.getInstance().setContext(this);
 
-        POIManager.getInstance().setContext(this);
+//        POIManager.getInstance().setContext(this);
 
         DataManager.getInstance().setContext(this);
     }

@@ -38,4 +38,7 @@ public class Constants {
     public static final int STATUS_CANCELED = -1;
     public static final int STATUS_DELETED = -2;
     public static final int STATUS_COMPLETE = 1;
+
+    public static final int PRIVACY_PUBLIC = 0;
+    public static final int PRIVACY_PRIVATE = 1;
 }

@@ -9,7 +9,6 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.xmx.searchpoi.R;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,5 +45,12 @@ public class CollectionView {
 
     public boolean isCollect(Marker marker) {
         return collectMarkers.contains(marker);
+    }
+
+    public void clearCollection() {
+        for (Marker collectMarker : collectMarkers) {
+            collectMarker.remove();
+        }
+        collectMarkers.clear();
     }
 }

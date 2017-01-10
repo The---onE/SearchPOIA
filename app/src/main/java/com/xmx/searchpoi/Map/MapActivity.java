@@ -19,7 +19,6 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
-import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.geocoder.GeocodeAddress;
 import com.amap.api.services.geocoder.GeocodeQuery;
 import com.amap.api.services.geocoder.GeocodeResult;
@@ -34,14 +33,10 @@ import com.xmx.searchpoi.Tools.Data.Callback.SelectCallback;
 import com.xmx.searchpoi.Tools.Map.AMap.Activity.BaseLocationDirectionActivity;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.Collection;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionView;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POI;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionManager;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POIView;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POIViewSearchCallback;
 import com.xmx.searchpoi.Tools.Map.AMap.Utils.AMapServicesUtil;
 import com.xmx.searchpoi.Tools.Map.AMap.Utils.AMapUtil;
 import com.xmx.searchpoi.Tools.Map.AMap.Utils.ToastUtil;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.POIManager;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
@@ -57,7 +52,6 @@ public class MapActivity extends BaseLocationDirectionActivity {
     private LatLng currentLatLng;
     private Marker currentCollect;
 
-    private POIView poiView;
     private CollectionView collectionView;
 
     @ViewInject(R.id.poi_name)
@@ -93,12 +87,48 @@ public class MapActivity extends BaseLocationDirectionActivity {
         if (currentLatLng != null) {
             position = currentLatLng;
         }
-        poiView.searchAndShowPOI(position, 0,
-                0, 0, keyword, new POIViewSearchCallback() {
+
+        collectionView.clearCollection();
+
+        CollectionManager.getInstance().selectPublic(keyword, keyword,
+                new SelectCallback<Collection>() {
+            @Override
+            public void success(List<Collection> poiList) {
+                for (Collection poi : poiList) {
+                    collectionView.addCollection(poi);
+                }
+            }
+
+            @Override
+            public void syncError(int error) {
+                CollectionManager.defaultError(error, getBaseContext());
+            }
+
+            @Override
+            public void syncError(AVException e) {
+                showToast(R.string.sync_failure);
+                filterException(e);
+            }
+        });
+
+        CollectionManager.getInstance().selectPrivate(keyword, keyword,
+                new SelectCallback<Collection>() {
                     @Override
-                    public void success() {
-                        whetherToShowDetailInfo(false);
-                        focusPOISearch();
+                    public void success(List<Collection> poiList) {
+                        for (Collection poi : poiList) {
+                            collectionView.addCollection(poi);
+                        }
+                    }
+
+                    @Override
+                    public void syncError(int error) {
+                        CollectionManager.defaultError(error, getBaseContext());
+                    }
+
+                    @Override
+                    public void syncError(AVException e) {
+                        showToast(R.string.sync_failure);
+                        filterException(e);
                     }
                 });
     }
@@ -117,14 +147,14 @@ public class MapActivity extends BaseLocationDirectionActivity {
                             && regeocodeResult.getRegeocodeAddress().getFormatAddress() != null) {
                         String address = regeocodeResult.getRegeocodeAddress().getFormatAddress();
                         showToast("地址:" + address);
-                        List<PoiItem> list = regeocodeResult.getRegeocodeAddress().getPois();
-                        if (list != null) {
-                            List<POI> poiList = POIManager.convertPOIList(list);
-                            //清除POI信息显示
-                            whetherToShowDetailInfo(false);
-                            focusPOISearch();
-                            poiView.showPOI(poiList);
-                        }
+//                        List<PoiItem> list = regeocodeResult.getRegeocodeAddress().getPois();
+//                        if (list != null) {
+//                            List<POI> poiList = POIManager.convertPOIList(list);
+//                            //清除POI信息显示
+//                            whetherToShowDetailInfo(false);
+//                            focusPOISearch();
+//                            poiView.showPOI(poiList);
+//                        }
                     } else {
                         showToast(R.string.no_result);
                     }
@@ -143,7 +173,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
                         LatLng latLng = AMapUtil.convertToLatLng(position);
 
                         whetherToShowDetailInfo(false);
-                        poiView.resetMarker();
+//                        poiView.resetMarker();
                         setCurrentPosition(latLng);
                         focusLocation(latLng);
                     } else {
@@ -174,8 +204,29 @@ public class MapActivity extends BaseLocationDirectionActivity {
     @Event(R.id.btn_cancel)
     private void onCancelClick(View view) {
         mSearchText.setText("");
-        poiView.removeFromMap();
+//        poiView.removeFromMap();
         whetherToShowDetailInfo(false);
+
+        collectionView.clearCollection();
+        CollectionManager.getInstance().selectPublic("", "", new SelectCallback<Collection>() {
+            @Override
+            public void success(List<Collection> poiList) {
+                for (Collection poi : poiList) {
+                    collectionView.addCollection(poi);
+                }
+            }
+
+            @Override
+            public void syncError(int error) {
+                CollectionManager.defaultError(error, getBaseContext());
+            }
+
+            @Override
+            public void syncError(AVException e) {
+                showToast(R.string.sync_failure);
+                filterException(e);
+            }
+        });
     }
 
     @Event(R.id.btn_collect)
@@ -191,7 +242,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
             builder.setPositiveButton("删除", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    POI poi = (POI) currentCollect.getObject();
+                    Collection poi = (Collection) currentCollect.getObject();
                     String id = poi.mCloudId;
                     CollectionManager.getInstance().deleteFromCloud(id,
                             new DelCallback() {
@@ -290,7 +341,6 @@ public class MapActivity extends BaseLocationDirectionActivity {
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
 
-        poiView = new POIView(this, mAMap);
         collectionView = new CollectionView(this, mAMap);
 
         strokeColor = Color.argb(180, 3, 145, 255);
@@ -305,7 +355,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
             @Override
             public void onMapClick(LatLng latLng) {
                 whetherToShowDetailInfo(false);
-                poiView.resetMarker();
+//                poiView.resetMarker();
 
                 setCurrentPosition(latLng);
             }
@@ -317,28 +367,28 @@ public class MapActivity extends BaseLocationDirectionActivity {
                 Object o = marker.getObject();
                 if (o != null) {
                     if (collectionView.isCollect(marker)) {
-                        POI poi = (POI) o;
+                        Collection poi = (Collection) o;
                         showToast(poi.getTitle());
                         currentCollect = marker;
                         return true;
                     }
                     whetherToShowDetailInfo(true);
-                    try {
-                        POI mCurrentPoi = (POI) marker.getObject();
-                        poiView.resetMarker(marker);
-                        Marker detailMarker = marker;
-                        detailMarker.setIcon(BitmapDescriptorFactory
-                                .fromBitmap(BitmapFactory.decodeResource(
-                                        getResources(),
-                                        R.drawable.poi_marker_pressed)));
-
-                        setPoiItemDisplayContent(mCurrentPoi);
-                    } catch (Exception e) {
-                        filterException(e);
-                    }
+//                    try {
+//                        POI mCurrentPoi = (POI) marker.getObject();
+//                        poiView.resetMarker(marker);
+//                        Marker detailMarker = marker;
+//                        detailMarker.setIcon(BitmapDescriptorFactory
+//                                .fromBitmap(BitmapFactory.decodeResource(
+//                                        getResources(),
+//                                        R.drawable.poi_marker_pressed)));
+//
+//                        setPoiItemDisplayContent(mCurrentPoi);
+//                    } catch (Exception e) {
+//                        filterException(e);
+//                    }
                 } else {
                     whetherToShowDetailInfo(false);
-                    poiView.resetMarker();
+//                    poiView.resetMarker();
                 }
                 return true;
             }
@@ -370,7 +420,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
         mAMap.getUiSettings().setMyLocationButtonEnabled(false);//设置默认定位按钮是否显示
         mAMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);//设置定位的类型为定位模式
 
-        CollectionManager.getInstance().selectAll(new SelectCallback<Collection>() {
+        CollectionManager.getInstance().selectPublic("", "", new SelectCallback<Collection>() {
             @Override
             public void success(List<Collection> poiList) {
                 for (Collection poi : poiList) {
@@ -391,10 +441,10 @@ public class MapActivity extends BaseLocationDirectionActivity {
         });
     }
 
-    private void setPoiItemDisplayContent(final POI mCurrentPoi) {
-        mPoiName.setText(mCurrentPoi.getTitle());
-        mPoiAddress.setText(mCurrentPoi.getSnippet());
-    }
+//    private void setPoiItemDisplayContent(final POI mCurrentPoi) {
+//        mPoiName.setText(mCurrentPoi.getTitle());
+//        mPoiAddress.setText(mCurrentPoi.getSnippet());
+//    }
 
     private void whetherToShowDetailInfo(boolean isToShow) {
         if (isToShow) {
