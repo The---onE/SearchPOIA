@@ -1,4 +1,4 @@
-package com.xmx.searchpoi.Tools.Map.AMap.POI;
+package com.xmx.searchpoi.Tools.Map.AMap.Collection;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
@@ -9,6 +9,7 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.xmx.searchpoi.R;
+import com.xmx.searchpoi.Tools.Map.AMap.POI.POI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +30,15 @@ public class CollectionView {
         mAMap = map;
     }
 
-    public void addCollection(POI poi) {
+    public void addCollection(Collection poi) {
         MarkerOptions m = new MarkerOptions()
                 .position(new LatLng(poi.getLatLonPoint().getLatitude(),
                         poi.getLatLonPoint().getLongitude()))
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(BitmapFactory.decodeResource(
                                 mContext.getResources(),
-                                R.drawable.point5)))
-                .anchor(0.5f, 0.5f);
+                                R.drawable.collection)))
+                .anchor(0.5f, 1f);
         Marker marker = mAMap.addMarker(m);
         marker.setObject(poi);
         collectMarkers.add(marker);

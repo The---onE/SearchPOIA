@@ -1,12 +1,13 @@
-package com.xmx.searchpoi.Tools.Map.AMap.POI;
+package com.xmx.searchpoi.Tools.Map.AMap.Collection;
 
 import com.xmx.searchpoi.Tools.Data.Cloud.BaseCloudEntityManager;
+import com.xmx.searchpoi.Tools.Map.AMap.POI.POI;
 
 /**
  * Created by The_onE on 2016/12/1.
  */
 
-public class CollectionManager extends BaseCloudEntityManager<POI> {
+public class CollectionManager extends BaseCloudEntityManager<Collection> {
     private static CollectionManager instance;
 
     public synchronized static CollectionManager getInstance() {
@@ -17,8 +18,8 @@ public class CollectionManager extends BaseCloudEntityManager<POI> {
     }
 
     private CollectionManager() {
-        tableName = "CustomPOI";
-        entityTemplate = new POI(null, null, null, null);
+        tableName = "Collection";
+        entityTemplate = new Collection(null, null, null, null, null, 0);
         //userField = "";
     }
 }

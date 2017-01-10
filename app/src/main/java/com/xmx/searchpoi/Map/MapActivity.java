@@ -30,12 +30,12 @@ import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.xmx.searchpoi.R;
 import com.xmx.searchpoi.Tools.Data.Callback.DelCallback;
-import com.xmx.searchpoi.Tools.Map.AMap.Activity.BaseLocationDirectionActivity;
-import com.xmx.searchpoi.Tools.Data.Callback.InsertCallback;
 import com.xmx.searchpoi.Tools.Data.Callback.SelectCallback;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.CollectionView;
+import com.xmx.searchpoi.Tools.Map.AMap.Activity.BaseLocationDirectionActivity;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.Collection;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionView;
 import com.xmx.searchpoi.Tools.Map.AMap.POI.POI;
-import com.xmx.searchpoi.Tools.Map.AMap.POI.CollectionManager;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionManager;
 import com.xmx.searchpoi.Tools.Map.AMap.POI.POIView;
 import com.xmx.searchpoi.Tools.Map.AMap.POI.POIViewSearchCallback;
 import com.xmx.searchpoi.Tools.Map.AMap.Utils.AMapServicesUtil;
@@ -223,45 +223,45 @@ public class MapActivity extends BaseLocationDirectionActivity {
             });
             builder.show();
         } else {
-            final EditText edit = new EditText(this);
-            edit.setTextColor(Color.BLACK);
-            edit.setTextSize(24);
-            new AlertDialog.Builder(MapActivity.this)
-                    .setTitle("添加收藏")
-                    .setIcon(android.R.drawable.ic_dialog_info)
-                    .setView(edit)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            String title = edit.getText().toString();
-                            final POI poi = new POI(UUID.randomUUID().toString(),
-                                    new LatLonPoint(currentLatLng.latitude, currentLatLng.longitude),
-                                    title, "");
-//                        POISQLManager.getInstance().insertData(poi);
-//                        addCollectMarker(poi);
-//                        showToast("收藏成功");
-                            CollectionManager.getInstance().insertToCloud(poi, new InsertCallback() {
-                                @Override
-                                public void success(AVObject user, String objectId) {
-                                    poi.mCloudId = objectId;
-                                    collectionView.addCollection(poi);
-                                    showToast("收藏成功");
-                                }
-
-                                @Override
-                                public void syncError(int error) {
-                                    CollectionManager.defaultError(error, getBaseContext());
-                                }
-
-                                @Override
-                                public void syncError(AVException e) {
-                                    showToast(R.string.sync_failure);
-                                    filterException(e);
-                                }
-                            });
-                        }
-                    })
-                    .setNegativeButton("取消", null).show();
+//            final EditText edit = new EditText(this);
+//            edit.setTextColor(Color.BLACK);
+//            edit.setTextSize(24);
+//            new AlertDialog.Builder(MapActivity.this)
+//                    .setTitle("添加收藏")
+//                    .setIcon(android.R.drawable.ic_dialog_info)
+//                    .setView(edit)
+//                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            String title = edit.getText().toString();
+//                            final POI poi = new POI(UUID.randomUUID().toString(),
+//                                    new LatLonPoint(currentLatLng.latitude, currentLatLng.longitude),
+//                                    title, "");
+////                        POISQLManager.getInstance().insertData(poi);
+////                        addCollectMarker(poi);
+////                        showToast("收藏成功");
+//                            CollectionManager.getInstance().insertToCloud(poi, new InsertCallback() {
+//                                @Override
+//                                public void success(AVObject user, String objectId) {
+//                                    poi.mCloudId = objectId;
+//                                    collectionView.addCollection(poi);
+//                                    showToast("收藏成功");
+//                                }
+//
+//                                @Override
+//                                public void syncError(int error) {
+//                                    CollectionManager.defaultError(error, getBaseContext());
+//                                }
+//
+//                                @Override
+//                                public void syncError(AVException e) {
+//                                    showToast(R.string.sync_failure);
+//                                    filterException(e);
+//                                }
+//                            });
+//                        }
+//                    })
+//                    .setNegativeButton("取消", null).show();
         }
     }
 
@@ -370,14 +370,10 @@ public class MapActivity extends BaseLocationDirectionActivity {
         mAMap.getUiSettings().setMyLocationButtonEnabled(false);//设置默认定位按钮是否显示
         mAMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);//设置定位的类型为定位模式
 
-//        List<POI> poiList = POISQLManager.getInstance().selectAll();
-//        for (POI poi : poiList) {
-//            addCollectMarker(poi);
-//        }
-        CollectionManager.getInstance().selectAll(new SelectCallback<POI>() {
+        CollectionManager.getInstance().selectAll(new SelectCallback<Collection>() {
             @Override
-            public void success(List<POI> poiList) {
-                for (POI poi : poiList) {
+            public void success(List<Collection> poiList) {
+                for (Collection poi : poiList) {
                     collectionView.addCollection(poi);
                 }
             }
@@ -419,8 +415,8 @@ public class MapActivity extends BaseLocationDirectionActivity {
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(BitmapFactory.decodeResource(
                                 getResources(),
-                                R.drawable.point6)))
-                .anchor(0.5f, 0.5f);
+                                R.drawable.selected)))
+                .anchor(0.5f, 1f);
         currentMarker = mAMap.addMarker(m);
         currentLatLng = latLng;
 
