@@ -26,12 +26,13 @@ import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.avos.avoscloud.AVException;
-import com.avos.avoscloud.AVObject;
 import com.xmx.searchpoi.R;
-import com.xmx.searchpoi.Tools.Data.Callback.DelCallback;
 import com.xmx.searchpoi.Tools.Data.Callback.SelectCallback;
 import com.xmx.searchpoi.Tools.Map.AMap.Activity.BaseLocationDirectionActivity;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.AddCollectionCallback;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.AddCollectionDialog;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.Collection;
+import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionDetailDialog;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionView;
 import com.xmx.searchpoi.Tools.Map.AMap.Collection.CollectionManager;
 import com.xmx.searchpoi.Tools.Map.AMap.Utils.AMapServicesUtil;
@@ -54,26 +55,14 @@ public class MapActivity extends BaseLocationDirectionActivity {
 
     private CollectionView collectionView;
 
-    @ViewInject(R.id.poi_name)
-    private TextView mPoiName;
-
-    @ViewInject(R.id.poi_address)
-    private TextView mPoiAddress;
-
     @ViewInject(R.id.input_edittext)
     private EditText mSearchText;
-
-    @ViewInject(R.id.btn_location)
-    private Button locationButton;
 
     @ViewInject(R.id.btn_collect)
     private Button collectButton;
 
     @ViewInject(R.id.btn_collect_cancel)
     private Button cancelCollectButton;
-
-    @ViewInject(R.id.poi_detail)
-    private RelativeLayout mPoiDetail;
 
     @Event(R.id.btn_location)
     private void onLocationClick(View view) {
@@ -106,7 +95,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
 
             @Override
             public void syncError(AVException e) {
-                showToast(R.string.sync_failure);
+                showToast(R.string.get_failure);
                 filterException(e);
             }
         });
@@ -127,7 +116,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
 
                     @Override
                     public void syncError(AVException e) {
-                        showToast(R.string.sync_failure);
+                        showToast(R.string.get_failure);
                         filterException(e);
                     }
                 });
@@ -223,7 +212,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
 
             @Override
             public void syncError(AVException e) {
-                showToast(R.string.sync_failure);
+                showToast(R.string.get_failure);
                 filterException(e);
             }
         });
@@ -235,84 +224,17 @@ public class MapActivity extends BaseLocationDirectionActivity {
             return;
         }
         if (currentCollect != null) {
-            AlertDialog.Builder builder = new AlertDialog
-                    .Builder(MapActivity.this);
-            builder.setMessage("要删除该收藏吗？");
-            builder.setTitle("提示");
-            builder.setPositiveButton("删除", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Collection poi = (Collection) currentCollect.getObject();
-                    String id = poi.mCloudId;
-                    CollectionManager.getInstance().deleteFromCloud(id,
-                            new DelCallback() {
-                                @Override
-                                public void success(AVObject user) {
-                                    showToast("删除成功");
-                                    currentCollect.remove();
-                                    currentCollect = null;
-                                }
-
-                                @Override
-                                public void syncError(int error) {
-                                    CollectionManager.defaultError(error, getBaseContext());
-                                }
-
-                                @Override
-                                public void syncError(AVException e) {
-                                    showToast(R.string.delete_failure);
-                                    filterException(e);
-                                }
-                            });
-                }
-            });
-            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            });
-            builder.show();
+            showToast("已添加收藏");
+            //删除收藏
         } else {
-//            final EditText edit = new EditText(this);
-//            edit.setTextColor(Color.BLACK);
-//            edit.setTextSize(24);
-//            new AlertDialog.Builder(MapActivity.this)
-//                    .setTitle("添加收藏")
-//                    .setIcon(android.R.drawable.ic_dialog_info)
-//                    .setView(edit)
-//                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int i) {
-//                            String title = edit.getText().toString();
-//                            final POI poi = new POI(UUID.randomUUID().toString(),
-//                                    new LatLonPoint(currentLatLng.latitude, currentLatLng.longitude),
-//                                    title, "");
-////                        POISQLManager.getInstance().insertData(poi);
-////                        addCollectMarker(poi);
-////                        showToast("收藏成功");
-//                            CollectionManager.getInstance().insertToCloud(poi, new InsertCallback() {
-//                                @Override
-//                                public void success(AVObject user, String objectId) {
-//                                    poi.mCloudId = objectId;
-//                                    collectionView.addCollection(poi);
-//                                    showToast("收藏成功");
-//                                }
-//
-//                                @Override
-//                                public void syncError(int error) {
-//                                    CollectionManager.defaultError(error, getBaseContext());
-//                                }
-//
-//                                @Override
-//                                public void syncError(AVException e) {
-//                                    showToast(R.string.sync_failure);
-//                                    filterException(e);
-//                                }
-//                            });
-//                        }
-//                    })
-//                    .setNegativeButton("取消", null).show();
+            AddCollectionDialog dialog = new AddCollectionDialog(MapActivity.this, currentLatLng,
+                    new AddCollectionCallback() {
+                        @Override
+                        public void success(Collection collection) {
+                            collectionView.addCollection(collection);
+                        }
+                    });
+            dialog.show();
         }
     }
 
@@ -325,11 +247,6 @@ public class MapActivity extends BaseLocationDirectionActivity {
         }
         cancelCollectButton.setVisibility(View.GONE);
         collectButton.setVisibility(View.GONE);
-    }
-
-    @Event(R.id.poi_detail)
-    private void onDetailClick(View view) {
-        //打开地点详情
     }
 
     @Override
@@ -367,25 +284,14 @@ public class MapActivity extends BaseLocationDirectionActivity {
                 Object o = marker.getObject();
                 if (o != null) {
                     if (collectionView.isCollect(marker)) {
-                        Collection poi = (Collection) o;
-                        showToast(poi.getTitle());
+                        Collection collection = (Collection) o;
+                        CollectionDetailDialog dialog
+                                = new CollectionDetailDialog(MapActivity.this, collection);
+                        dialog.show();
                         currentCollect = marker;
                         return true;
                     }
                     whetherToShowDetailInfo(true);
-//                    try {
-//                        POI mCurrentPoi = (POI) marker.getObject();
-//                        poiView.resetMarker(marker);
-//                        Marker detailMarker = marker;
-//                        detailMarker.setIcon(BitmapDescriptorFactory
-//                                .fromBitmap(BitmapFactory.decodeResource(
-//                                        getResources(),
-//                                        R.drawable.poi_marker_pressed)));
-//
-//                        setPoiItemDisplayContent(mCurrentPoi);
-//                    } catch (Exception e) {
-//                        filterException(e);
-//                    }
                 } else {
                     whetherToShowDetailInfo(false);
 //                    poiView.resetMarker();
@@ -435,7 +341,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
 
             @Override
             public void syncError(AVException e) {
-                showToast(R.string.sync_failure);
+                showToast(R.string.get_failure);
                 filterException(e);
             }
         });
@@ -447,11 +353,11 @@ public class MapActivity extends BaseLocationDirectionActivity {
 //    }
 
     private void whetherToShowDetailInfo(boolean isToShow) {
-        if (isToShow) {
-            mPoiDetail.setVisibility(View.VISIBLE);
-        } else {
-            mPoiDetail.setVisibility(View.GONE);
-        }
+//        if (isToShow) {
+//            mPoiDetail.setVisibility(View.VISIBLE);
+//        } else {
+//            mPoiDetail.setVisibility(View.GONE);
+//        }
     }
 
     private void setCurrentPosition(LatLng latLng) {

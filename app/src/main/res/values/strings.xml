@@ -71,6 +71,10 @@
     <string name="sync_success">同步完成</string>
     <string name="sync_failure">同步失败</string>
 
+    <string name="get">获取</string>
+    <string name="get_success">获取完成</string>
+    <string name="get_failure">获取失败</string>
+
     <string name="year">年</string>
     <string name="month">月</string>
     <string name="day">天</string>
@@ -89,6 +93,12 @@
     <string name="collect">收藏</string>
 
     <string name="route">路线</string>
+
+    <string name="title_hint">请输入标题</string>
+    <string name="type_hint">请输入类型</string>
+    <string name="content_hint">请输入详细内容(可选)</string>
+    <string name="p_private">私有</string>
+    <string name="p_public">公开</string>
 
     <string name="basic_map">显示地图</string>
     <string name="basic_description">介绍如何创建一个基本地图</string>

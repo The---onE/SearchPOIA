@@ -4,7 +4,9 @@ import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.FindCallback;
+import com.avos.avoscloud.SaveCallback;
 import com.xmx.searchpoi.Constants;
+import com.xmx.searchpoi.Tools.Data.Callback.InsertCallback;
 import com.xmx.searchpoi.Tools.Data.Callback.SelectCallback;
 import com.xmx.searchpoi.Tools.Data.Cloud.BaseCloudEntityManager;
 import com.xmx.searchpoi.Tools.Data.DataConstants;
@@ -28,9 +30,27 @@ public class CollectionManager extends BaseCloudEntityManager<Collection> {
     }
 
     private CollectionManager() {
-        tableName = "Collection";
+        tableName = "CollectionA";
         entityTemplate = new Collection(null, null, null, null, null, 0);
         //userField = "";
+    }
+
+    public void addCollection(final Collection entity, final InsertCallback callback) {
+        if (!checkDatabase()) {
+            callback.syncError(DataConstants.NOT_INIT);
+            return;
+        }
+        final AVObject object = entity.getContent(tableName);
+        object.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(AVException e) {
+                if (e == null) {
+                    callback.success(null, object.getObjectId());
+                } else {
+                    callback.syncError(e);
+                }
+            }
+        });
     }
 
     public void selectPublic(String title, String type,

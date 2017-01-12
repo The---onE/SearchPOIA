@@ -27,10 +27,10 @@ public class Collection extends PoiItem implements ISQLEntity, ICloudEntity, ISy
     public Collection(String id,
                       LatLonPoint point,
                       String title,
-                      String snippet,
                       String type,
+                      String content,
                       int privacy) {
-        super(id, point, title, snippet);
+        super(id, point, title, content);
         mType = type;
         mPrivacy = privacy;
         mTime = new Date();
@@ -89,7 +89,7 @@ public class Collection extends PoiItem implements ISQLEntity, ICloudEntity, ISy
         Date time = new Date(c.getLong(9));
 
         Collection entity = new Collection(PoiId, new LatLonPoint(latitude, longitude), title,
-                content, type, privacy);
+                type, content, privacy);
         entity.mId = id;
         entity.mCloudId = cloudId;
         entity.mTime = time;
@@ -113,7 +113,7 @@ public class Collection extends PoiItem implements ISQLEntity, ICloudEntity, ISy
         object.put("type", mType);
         object.put("content", getSnippet());
         object.put("privacy", mPrivacy);
-        object.put("time", mTime.getTime());
+        object.put("time", mTime);
 
         return object;
     }
@@ -132,7 +132,7 @@ public class Collection extends PoiItem implements ISQLEntity, ICloudEntity, ISy
         Date time = object.getDate("time");
 
         Collection entity = new Collection(PoiId, new LatLonPoint(latitude, longitude), title,
-                content, type, privacy);
+                type, content, privacy);
         entity.mId = id;
         entity.mCloudId = cloudId;
         entity.mTime = time;
