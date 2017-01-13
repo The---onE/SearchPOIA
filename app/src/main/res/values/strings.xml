@@ -72,7 +72,7 @@
     <string name="sync_failure">同步失败</string>
 
     <string name="get">获取</string>
-    <string name="get_success">获取完成</string>
+    <string name="get_success">获取成功</string>
     <string name="get_failure">获取失败</string>
 
     <string name="year">年</string>

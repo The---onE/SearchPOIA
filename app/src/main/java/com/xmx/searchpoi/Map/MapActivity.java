@@ -104,9 +104,12 @@ public class MapActivity extends BaseLocationDirectionActivity {
                 new SelectCallback<Collection>() {
                     @Override
                     public void success(List<Collection> poiList) {
-                        for (Collection poi : poiList) {
-                            collectionView.addCollection(poi);
+                        if (poiList.size() > 0) {
+                            for (Collection poi : poiList) {
+                                collectionView.addCollection(poi);
+                            }
                         }
+                        showToast(R.string.get_success);
                     }
 
                     @Override
@@ -231,6 +234,7 @@ public class MapActivity extends BaseLocationDirectionActivity {
                     new AddCollectionCallback() {
                         @Override
                         public void success(Collection collection) {
+                            showToast("收藏成功");
                             collectionView.addCollection(collection);
                         }
                     });
